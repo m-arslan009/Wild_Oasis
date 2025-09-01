@@ -6,7 +6,7 @@ import CreateCabinForm from "../features/cabin/CreateCabinForm";
 import Button from "../UI/Button";
 
 export default function Cabins() {
-  const [isShow, setIsShow] = useState(true);
+  const [isShow, setIsShow] = useState(false);
   return (
     <>
       <Row type="horizontal">
