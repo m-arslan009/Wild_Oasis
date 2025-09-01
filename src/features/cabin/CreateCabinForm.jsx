@@ -1,4 +1,3 @@
-import { Form } from "react-router";
 import styled from "styled-components";
 import Input from "../../UI/Input";
 import { Textarea } from "../../UI/Textarea";
@@ -44,8 +43,12 @@ const Error = styled.span`
 export default function CreateCabinForm() {
   const { register, handleSubmit } = useForm();
 
+  function onSubmit(data) {
+    console.log(data);
+  }
+
   return (
-    <div>
+    <form onSubmit={handleSubmit(onSubmit)}>
       <FormRow>
         <Label htmlFor="name">Cabin Name</Label>
         <Input type="text" id="name" {...register("name")} />
@@ -86,6 +89,6 @@ export default function CreateCabinForm() {
         </Button>
         <Button>Edit Form</Button>
       </FormRow>
-    </div>
+    </form>
   );
 }
