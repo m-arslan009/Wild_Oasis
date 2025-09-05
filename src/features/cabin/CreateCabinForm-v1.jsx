@@ -1,44 +1,36 @@
-import { useForm } from "react-hook-form";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { useCreateCabin } from "./useCreateCabin";
-import { useUpdateCabin } from "./useUpdateCabin";
-import { Textarea } from "../../UI/Textarea";
 import Input from "../../UI/Input";
 import Button from "../../UI/Button";
+import toast from "react-hot-toast";
 import FormRow from "../../UI/FormRow";
 import Form from "../../UI/Form";
 import FileInput from "../../UI/FileInput";
+import { Textarea } from "../../UI/Textarea";
 
-export default function CreateCabinForm({ cabinToEdit = {}, onClick }) {
-  const { id: editId, ...editValues } = cabinToEdit;
-  const isEditSession = Boolean(editId);
+import { createCabin } from "../../Services/apiCabins";
+import { useForm } from "react-hook-form";
 
-  const { register, handleSubmit, getValues, formState, reset } = useForm({
-    defaultValues: isEditSession ? editValues : {},
-  });
+export default function CreateCabinForm() {
+  const queryClient = useQueryClient();
+  const { register, handleSubmit, reset, getValues, formState } = useForm();
   const { errors } = formState;
 
-  const { createCabin } = useCreateCabin();
-  const { editCabin } = useUpdateCabin();
+  const { mutate } = useMutation({
+    mutationFn: createCabin,
+    onSuccess: () => {
+      toast.success("Cabin created successfully");
+      queryClient.invalidateQueries({ queryKey: ["cabins"] });
+      reset();
+    },
+
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
 
   function onSubmit(data) {
-    const image = typeof data.image === "string" ? data.image : data.image[0];
-
-    if (isEditSession)
-      editCabin(
-        { newCabinData: { ...data, image }, id: editId },
-        {
-          onSuccess: (data) => reset(),
-        }
-      );
-    else
-      createCabin(
-        { ...data, image },
-        {
-          onSuccess: (data) => reset(),
-        }
-      );
-    setTimeout(onClick(), 700);
+    mutate({ ...data, image: data.image[0] });
   }
 
   // function onError(errors) {
@@ -113,16 +105,14 @@ export default function CreateCabinForm({ cabinToEdit = {}, onClick }) {
           // type="file" instead of declaring at this point we can declare it even in css component file. see FileInput.jsx
           id="image"
           accept="image/*"
-          {...register("image", {
-            required: isEditSession ? false : "Upload Image",
-          })}
+          {...register("image", { required: "Upload Image" })}
         />
       </FormRow>
       <FormRow>
         <Button variation="secondary" type="reset">
           Cancel
         </Button>
-        <Button>{isEditSession ? "Edit Cabin" : "Create new Cabin"}</Button>
+        <Button>Edit Form</Button>
       </FormRow>
     </Form>
   );
