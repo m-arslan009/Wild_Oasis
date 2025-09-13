@@ -9,7 +9,7 @@ import FormRow from "../../UI/FormRow";
 import Form from "../../UI/Form";
 import FileInput from "../../UI/FileInput";
 
-export default function CreateCabinForm({ cabinToEdit = {}, onClick }) {
+export default function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
   const { id: editId, ...editValues } = cabinToEdit;
   const isEditSession = Boolean(editId);
 
@@ -28,26 +28,34 @@ export default function CreateCabinForm({ cabinToEdit = {}, onClick }) {
       editCabin(
         { newCabinData: { ...data, image }, id: editId },
         {
-          onSuccess: (data) => reset(),
+          onSuccess: (data) => {
+            reset();
+            onCloseModal?.();
+          },
         }
       );
     else
       createCabin(
         { ...data, image },
         {
-          onSuccess: (data) => reset(),
+          onSuccess: (data) => {
+            reset();
+            onCloseModal?.();
+          },
         }
       );
-    setTimeout(onClick(), 700);
   }
 
-  // function onError(errors) {
-  //   // console.log("Error: ", errors);
-  // }
+  function onError(errors) {
+    // console.log("Error: ", errors);
+  }
 
   return (
     // <Form onSubmit={handleSubmit(onSubmit, onError)}>
-    <Form onSubmit={handleSubmit(onSubmit)}>
+    <Form
+      onSubmit={handleSubmit(onSubmit, onError)}
+      type={onCloseModal ? "modal" : "regular"}
+    >
       <FormRow label="Cabin Name" error={errors?.name?.message}>
         <Input
           type="text"
@@ -119,7 +127,11 @@ export default function CreateCabinForm({ cabinToEdit = {}, onClick }) {
         />
       </FormRow>
       <FormRow>
-        <Button variation="secondary" type="reset">
+        <Button
+          variation="secondary"
+          type="reset"
+          onClick={() => onCloseModal?.()}
+        >
           Cancel
         </Button>
         <Button>{isEditSession ? "Edit Cabin" : "Create new Cabin"}</Button>
